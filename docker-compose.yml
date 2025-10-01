@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  gem:
+    build: .
+    volumes:
+      - .:/app
+      - gem_cache:/usr/local/bundle
+    working_dir: /app
+    command: tail -f /dev/null  # Keep container running for development
+    environment:
+      - BUNDLE_PATH=/usr/local/bundle
+
+volumes:
+  gem_cache:
