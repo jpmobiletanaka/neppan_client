@@ -7,7 +7,7 @@ module NeppanClient
         'OTARequest'
       end
 
-      def request_params
+      def request_params(_params)
         {
           TransactionType: {
             DataFrom: 'FromMetroSystem',

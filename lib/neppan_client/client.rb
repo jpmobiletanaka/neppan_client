@@ -4,18 +4,29 @@ require 'httparty'
 require 'nokogiri'
 
 module NeppanClient
-  class Client < BaseService
-    param :sc_account
+  class Client
+    class NeppanResponseError < StandardError; end
 
-    def call
-      params = prepare_params
-      response = HTTParty.post(url, body: { xml: params }, ssl_version: 'TLSv1_1', encoding: Encoding::UTF_8)
-      raise ResponseError, response.parsed_response if error_response?(response)
+    def initialize(sc_account)
+      @sc_account = sc_account
+    end
+
+    def call(params = {})
+      xml = prepare_params(params)
+
+      ssl_context = OpenSSL::SSL::SSLContext.new
+      ssl_context.min_version = OpenSSL::SSL::TLS1_1_VERSION
+      ssl_context.max_version = OpenSSL::SSL::TLS1_1_VERSION
+
+      response = HTTParty.post(url, body: { xml: xml }, ssl_context: ssl_context, encoding: Encoding::UTF_8)
+      raise NeppanResponseError, response.parsed_response if error_response?(response)
 
       response.parsed_response
     end
 
     private
+
+    attr_reader :sc_account
 
     def error_response?(response)
       response.code != 200 || response.parsed_response.values&.first&.dig('ResultInformation', 'ResultCode') == '1'
@@ -25,7 +36,7 @@ module NeppanClient
       "#{sc_account.url}/#{sc_account.sc_system_id}/#{url_path}"
     end
 
-    def prepare_params
+    def prepare_params(params)
       builder = Nokogiri::XML::Builder.new(encoding: 'UTF-8') do |xml|
         xml.send(root.to_sym) do
           xml.AttestationInformation do
@@ -33,8 +44,8 @@ module NeppanClient
             xml.UserPassword sc_account.sc_password
             xml.AccomodationCode sc_account.sc_system_id
           end
-          
-          request_params.each do |key, value|
+
+          request_params(params).each do |key, value|
             if value.is_a?(Hash)
               xml.send(key.to_sym) do
                 value.each { |k, v| xml.send(k.to_sym, v) }
@@ -45,7 +56,7 @@ module NeppanClient
           end
         end
       end
-      
+
       builder.to_xml
     end
 
@@ -58,7 +69,7 @@ module NeppanClient
       raise NotImplementedError, "Subclasses must implement #root"
     end
 
-    def request_params
+    def request_params(_)
       raise NotImplementedError, "Subclasses must implement #request_params"
     end
 

@@ -3,13 +3,11 @@
 module NeppanClient
   module SeasonalityRates
     class Client < NeppanClient::Client
-      param :rate_group_id
-
       def root
         'SeasonalityRateRequest'
       end
 
-      def request_params
+      def request_params(params)
         {
           TransactionType: {
             DataFrom: 'FromMetroSystem',
@@ -18,7 +16,7 @@ module NeppanClient
             SystemTime: system_date_time.strftime('%T')
           },
           SeasonalityRateList: {
-            RateGroupId: rate_group_id
+            RateGroupId: params[:rate_group_id]
           }
         }
       end

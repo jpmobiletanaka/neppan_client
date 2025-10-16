@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-require_relative "neppan_client/base_service"
+
 require_relative "neppan_client/client"
 
 # Load all specific clients

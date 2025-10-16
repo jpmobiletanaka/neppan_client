@@ -3,15 +3,11 @@
 module NeppanClient
   module CalendarSeasonality
     class Client < NeppanClient::Client
-      param :rate_calendar_id
-      param :term_from
-      param :term_to
-
       def root
         'CalendarSeasonalityRequest'
       end
 
-      def request_params
+      def request_params(params)
         {
           TransactionType: {
             DataFrom: 'FromMetroSystem',
@@ -20,9 +16,9 @@ module NeppanClient
             SystemTime: system_date_time.strftime('%T')
           },
           CalendarSeasonalityList: {
-            RateCalendarId: rate_calendar_id,
-            TermFrom: term_from.strftime('%F'),
-            TermTo: term_to.strftime('%F')
+            RateCalendarId: params[:rate_calendar_id],
+            TermFrom: params[:term_from].strftime('%F'),
+            TermTo: params[:term_to].strftime('%F')
           }
         }
       end

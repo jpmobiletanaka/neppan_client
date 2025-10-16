@@ -3,13 +3,11 @@
 module NeppanClient
   module CalendarSeasonalitySetting
     class Client < NeppanClient::Client
-      param :rates
-
       def root
         'CalendarSeasonalitySettingRequest'
       end
 
-      def request_params
+      def request_params(_params)
         {
           TransactionType: {
             DataFrom: 'FromMetroSystem',
@@ -20,7 +18,7 @@ module NeppanClient
         }
       end
 
-      def prepare_params
+      def prepare_params(params)
         info = {
           AttestationInformation: {
             UserCode: sc_account.sc_user_id,
@@ -28,13 +26,13 @@ module NeppanClient
             AccomodationCode: sc_account.sc_system_id
           }
         }
-        info.merge(request_params)
-        doc = Nokogiri::XML(info.merge(request_params).to_xml(root: root))
-        doc.at(root).add_child(rate_params)
+        info.merge(request_params(params))
+        doc = Nokogiri::XML(info.merge(request_params(params)).to_xml(root: root))
+        doc.at(root).add_child(rate_params(params))
         doc.to_xml
       end
 
-      def rate_params
+      def rate_params(rates)
         rates.map do |rate_calendar_id, dates|
           <<-XML
             <CalendarSeasonalityList>
