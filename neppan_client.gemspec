@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |spec|
   spec.name = "neppan_client"
-  spec.version = "1.1.5"
+  spec.version = "1.1.6"
   spec.authors = [ "duongtv-devruby" ]
   spec.email = [ "t-duong@w.metroengines.jp" ]
 

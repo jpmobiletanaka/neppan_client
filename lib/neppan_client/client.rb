@@ -7,6 +7,12 @@ module NeppanClient
   class Client
     class NeppanResponseError < StandardError; end
 
+    class << self
+      def call(sc_account, params = {})
+        new(sc_account).call(params)
+      end
+    end
+
     def initialize(sc_account)
       @sc_account = sc_account
     end
