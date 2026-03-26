@@ -19,12 +19,27 @@ module NeppanClient
 
     def call(params = {})
       xml = prepare_params(params)
+      proxy_uri = URI.parse(ENV['SC_PROXY']) if ENV['SC_PROXY']
 
       ssl_context = OpenSSL::SSL::SSLContext.new
       ssl_context.min_version = OpenSSL::SSL::TLS1_1_VERSION
       ssl_context.max_version = OpenSSL::SSL::TLS1_1_VERSION
 
-      response = HTTParty.post(url, body: { xml: xml }, ssl_context: ssl_context, encoding: Encoding::UTF_8)
+      options = {
+        body: { xml: xml },
+        ssl_context: ssl_context,
+        encoding: Encoding::UTF_8
+      }
+
+      if proxy_uri
+        options.merge!(
+          http_proxyaddr: proxy_uri.host,
+          http_proxyport: proxy_uri.port,
+          http_proxyuser: proxy_uri.user,
+          http_proxypass: proxy_uri.password
+        )
+      end
+      response = HTTParty.post(url, options)
       raise NeppanResponseError, response.parsed_response if error_response?(response)
 
       response.parsed_response
